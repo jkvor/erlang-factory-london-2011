@@ -1,0 +1,7 @@
+{
+  "name": "Erlang Factory London 2011",
+  "description": "Utilizing Redis in distributed Erlang systems",
+  "sections": [
+    {"section":"one"}
+  ]
+}
