@@ -1,61 +1,94 @@
-!SLIDE title-slide
+!SLIDE title-slide center bullets
 
 # Utilizing Redis in distributed Erlang systems #
 
-!SLIDE
+* jkvor.com/erlang-factory-london
+
+!SLIDE center smbullets incremental transition=fade
 
 # Jacob Vorreuter and Orion Henry #
 
 ![heroku](heroku.png)
 
-Heroku is a platform composed of heterogeneous components (Ruby, Erlang, Go)
+* Heroku is a platform composed of heterogeneous components
+* Ruby, Erlang, Go
+* Components must communicate and share information
 
-These components must communicate and share information
+!SLIDE center smbullets incremental transition=fade
 
-!SLIDE
+![redis](redis.png)
 
-# Enter Redis... #
-
-* Extremely fast
-  * written in C
-  * single threaded
-  * non-blocking, evented I/O
-  * requires no external dependencies (not even an event library like libevent/libev)
+* Written in C
+* Single threaded
+* Non-blocking, evented I/O
+* Requires no external dependencies
 * Supports data types such as lists, sets and hashes
 * Persistence is available via async writes to disk
 * Master/slave replication
 * Pub/Sub capabilities
 
-!SLIDE
+!SLIDE smbullets incremental transition=fade
 
 # How Heroku uses Redis #
 
+* As an ephemeral registry of instance health and availability
 * As a redundant cache of shared state data
-* To track running instances
-* To collect statistics across applications
-* To collect logs from multiple applications
+* As a destination for capped collections of log data
+* As a pub/sub channel used to generate real-time usage graphs
 
-!SLIDE
+!SLIDE center smbullets
 
-* First case: As a redundant cache of shared state data
+# github.com/JacobVorreuter/redgrid #
 
-Hermes
-* Erlang HTTP proxy
-* Balances HTTP requests across your app''s backend web server processes, tracking load and intelligently routing traffic to available resources
+* Automatic Erlang node discovery via Redis
 
 !SLIDE center
 
-![hermes](hermes-redis-diag.png)
+![redgrid](redgrid.png)
 
 !SLIDE
 
+	1> node().
+	'foo@blah'
+	2> redgrid:update_meta([{weight, 0}]).
+	ok
+
+	1> node().
+	'bar@wha'
+	2> redgrid:nodes().
+	[{'bar@wha',  [{ip, "10.0.0.2"}]},
+	 {'foo@blah', [{ip, "10.0.0.1"},
+	               {weight, 0}]}]
+
+!SLIDE center smbullets
+
+# github.com/JacobVorreuter/redo #
+
+* pipelined erlang redis client 
+
+!SLIDE center transition=fade
+
+# Redis as a redundant cache of shared state #
+
+![hermes](hermes-redis-diag.png)
+
+!SLIDE smbullets transition=fade
+
 * problem: redis slave blocks while loading dataset into memory
-disconnecting from master due to master failure or network hiccup causes slave downtime
-
-redis log output
-
+* disconnecting from master due to master failure or network hiccup causes slave downtime
+* redis log output
 * solution: on slave boot, temporarily set correct master auth to allow sync, then unset to prevent re-sync
+* slave-sync output
 
-slave-sync output
+!SLIDE center smbullets
 
+# github.com/JacobVorreuter/nsync
+
+* Erlang Redis replication client
+
+!SLIDE center smbullets
+
+# github.com/JacobVorreuter/tempo #
+
+* Node.js websocket interface to Redis pub/sub channels
 
