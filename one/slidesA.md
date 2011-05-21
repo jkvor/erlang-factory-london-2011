@@ -66,6 +66,47 @@
 
 * pipelined erlang redis client 
 
+!SLIDE
+
+# Simple, pipelined, no sugar #
+
+        1> redo:start_link().
+        {ok,<0.33.0>}
+
+        2> redo:cmd(["SET", "one", "abc"]).
+        <<"OK">>
+
+        3> redo:cmd(["SET", "two", "def"]).
+        <<"OK">>
+
+        4> redo:cmd([["GET", "one"],
+                     ["GET", "two"]]).
+        [<<"abc">>,<<"def">>]
+
+!SLIDE transition=fade
+
+        1> bench:sync(1000).
+        91ms
+        10989 req/sec
+
+        2> bench:sync(10000).
+        938ms
+        10752 req/sec
+ 
+!SLIDE transition=fade
+
+        1> bench:async(1000, 100).
+        38ms
+        26315 req/sec
+
+        2> bench:async(10000, 1000).
+        294ms
+        34482 req/sec
+
+        3> bench:async(34000, 1500).
+        1092ms
+        31250 req/sec
+
 !SLIDE center transition=fade
 
 # Redis as a redundant cache of shared state #
