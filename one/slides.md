@@ -4,7 +4,7 @@
 
 * jkvor.com/erlang-factory-london
 
-!SLIDE center smbullets incremental transition=fade
+!SLIDE center smbullets incremental transition=scrollUp
 
 # Jacob Vorreuter and Orion Henry #
 
@@ -14,7 +14,7 @@
 * Ruby, Erlang, Go
 * Components must communicate and share information
 
-!SLIDE center smbullets incremental transition=fade
+!SLIDE center smbullets incremental transition=scrollUp
 
 ![redis](redis.png)
 
@@ -27,7 +27,7 @@
 * Master/slave replication
 * Pub/Sub capabilities
 
-!SLIDE smbullets incremental transition=fade
+!SLIDE smbullets incremental transition=scrollUp
 
 # How Heroku uses Redis #
 
@@ -36,17 +36,27 @@
 * As a destination for capped collections of log data
 * As a pub/sub channel used to generate real-time usage graphs
 
-!SLIDE center smbullets
+!SLIDE center transition=scrollUp
+
+# Tools and examples #
+
+!SLIDE center smbullets transition=scrollUp
 
 # github.com/JacobVorreuter/redgrid #
 
 * Automatic Erlang node discovery via Redis
 
-!SLIDE center
+!SLIDE center transition=scrollUp
+
+![redgrid2](redgrid2.png)
+
+!SLIDE center transition=scrollUp
 
 ![redgrid](redgrid.png)
 
-!SLIDE
+!SLIDE transition=scrollUp small
+
+# Attaching meta data to nodes #
 
 	1> node().
 	'foo@blah'
@@ -60,13 +70,13 @@
 	 {'foo@blah', [{ip, "10.0.0.1"},
 	               {weight, 0}]}]
 
-!SLIDE center smbullets
+!SLIDE center smbullets transition=scrollUp
 
 # github.com/JacobVorreuter/redo #
 
 * pipelined erlang redis client 
 
-!SLIDE
+!SLIDE transition=scrollUp small
 
 # Simple, pipelined, no sugar #
 
@@ -83,7 +93,9 @@
                      ["GET", "two"]]).
         [<<"abc">>,<<"def">>]
 
-!SLIDE transition=fade
+!SLIDE transition=scrollUp
+
+# Fast #
 
         1> bench:sync(1000).
         91ms
@@ -93,7 +105,9 @@
         938ms
         10752 req/sec
  
-!SLIDE transition=fade
+!SLIDE transition=scrollUp
+
+# Faster #
 
         1> bench:async(1000, 100).
         38ms
@@ -107,27 +121,57 @@
         1092ms
         31250 req/sec
 
-!SLIDE center transition=fade
+
+!SLIDE center transition=scrollUp
+
+# An example of Redis at Heroku #
+
+!SLIDE center transition=scrollUp
+
+# Erlang routing mesh #
+
+![routingmesh](routingmesh.png)
+
+!SLIDE center transition=scrollUp
 
 # Redis as a redundant cache of shared state #
 
 ![hermes](hermes-redis-diag.png)
 
-!SLIDE smbullets transition=fade
+!SLIDE smbullets transition=scrollUp
 
-* problem: redis slave blocks while loading dataset into memory
-* disconnecting from master due to master failure or network hiccup causes slave downtime
-* redis log output
-* solution: on slave boot, temporarily set correct master auth to allow sync, then unset to prevent re-sync
-* slave-sync output
+# One limitation of Redis replication #
 
-!SLIDE center smbullets
+* There is a period during slave resync when neither the old or new dataset is available
+* Disconnecting from master due to master failure or network hiccup causes slave downtime
+
+!SLIDE transition=scrollUp smaller
+
+        - Reading from client: Connection reset by peer
+        * Connecting to MASTER...
+        * MASTER <-> SLAVE sync started: SYNC sent
+        * MASTER <-> SLAVE sync: receiving 66055964 bytes from master
+        * MASTER <-> SLAVE sync: Loading DB in memory
+        * MASTER <-> SLAVE sync: Finished with success
+
+!SLIDE transition=scrollUp small
+
+        00:24:57: CONFIG SET MASTERAUTH password
+        00:24:57: OK
+        00:24:57: STATUS: master_link_status:down
+        00:24:57: waiting for master_link_status:up
+        ...
+        00:25:08: STATUS: master_link_status:up
+        00:25:08: CONFIG SET MASTERAUTH NULL
+        00:25:08: OK
+        
+!SLIDE center smbullets transition=scrollUp
 
 # github.com/JacobVorreuter/nsync
 
 * Erlang Redis replication client
 
-!SLIDE center smbullets
+!SLIDE center smbullets transition=scrollUp
 
 # github.com/JacobVorreuter/tempo #
 
