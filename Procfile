@@ -1,1 +1,1 @@
-web	showoff serve
+web: showoff serve
