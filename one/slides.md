@@ -142,10 +142,13 @@
 
 # One limitation of Redis replication #
 
-* There is a period during slave resync when neither the old or new dataset is available
-* Disconnecting from master due to master failure or network hiccup causes slave downtime
+* Dataset is unavailable during slave resync
+* Network partition or hiccup causes downtime
+* (error) LOADING Redis is loading the dataset in memory
 
 !SLIDE transition=scrollUp smaller
+
+# redis.log #
 
         - Reading from client: Connection reset by peer
         * Connecting to MASTER...
@@ -155,6 +158,8 @@
         * MASTER <-> SLAVE sync: Finished with success
 
 !SLIDE transition=scrollUp small
+
+# slave-sync.sh #
 
         00:24:57: CONFIG SET MASTERAUTH password
         00:24:57: OK
@@ -169,11 +174,50 @@
 
 # github.com/JacobVorreuter/nsync
 
-* Erlang Redis replication client
+* Prototype of an Erlang Redis replication client
+
+!SLIDE center smbullets incremental transition=scrollUp
+
+# Redis replication #
+
+* slave opens a tcp socket connected to the master redis
+* slave issues a "SYNC" command
+* master asynchronously dumps its dataset to disk
+* dataset is transfered to the slave as an rdb dump
+* master streams updates to the slave using the redis text protocol
+
+!SLIDE center smbullets incremental transition=scrollUp
+
+# Nsync in-memory storage #
+
+* Nsync stores redis keys in ETS tables
+* strings -> binaries
+* sets and lists -> lists
+* hashes -> dicts
+
+!SLIDE center transition=scrollUp
+
+# Heroku use case #
+
+!SLIDE center smbullets incremental transition=scrollUp
+
+# Migrating Logplex from Redis to mnesia #
+
+* branch logplex and add mnesia tables
+* boot new cluster of empty mnesia logplex nodes
+* start Nsync on new nodes replicating from master redis
+* rdb dump is loaded into mnesia
+* subsequent updates are loaded into mnesia
+* point logplex.heroku.com dns at new cluster
+* shutdown Nsync
 
 !SLIDE center smbullets transition=scrollUp
 
 # github.com/JacobVorreuter/tempo #
 
 * Node.js websocket interface to Redis pub/sub channels
+
+!SLIDE center transition=scrollUp
+
+![tempo](tempo.png)
 
