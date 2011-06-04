@@ -2,7 +2,7 @@
 
 # Utilizing Redis in distributed Erlang systems #
 
-* jkvor.com/erlang-factory-london
+* erlang-factory.herokuapp.com
 
 !SLIDE center smbullets incremental transition=scrollUp
 
@@ -34,7 +34,7 @@
 * As an ephemeral registry of instance health and availability
 * As a redundant cache of shared state data
 * As a destination for capped collections of log data
-* As a pub/sub channel used to generate real-time usage graphs
+* As a pub/sub channel powering real-time usage graphs
 
 !SLIDE center transition=scrollUp
 
@@ -93,6 +93,29 @@
                      ["GET", "two"]]).
         [<<"abc">>,<<"def">>]
 
+!SLIDE transition=scrollUp small
+
+# More commands #
+
+        5> redo:cmd([["SADD", "sfoo", "123"],
+                     ["SADD", "sfoo", "456"]]).
+        [1,1]
+
+        6> redo:cmd(["SMEMBERS", "sfoo"]).
+        [<<"123">>,<<"456">>]
+
+        7> redo:cmd(["HMSET", "hfoo",
+                     "width", "100",
+                     "height", "75",
+                     "depth", "50"]).
+        <<"OK">>
+
+        8> redo:cmd(["HGETALL", "hfoo"]).
+        [<<"width">>,<<"100">>,
+         <<"height">>,<<"75">>,
+         <<"depth">>,<<"50">>]
+        
+
 !SLIDE transition=scrollUp
 
 # Fast #
@@ -122,11 +145,70 @@
         31250 req/sec
 
 
+!SLIDE center smbullets transition=scrollUp
+
+# github.com/JacobVorreuter/nsync
+
+* Erlang Redis replication client
+
+!SLIDE center smbullets incremental transition=scrollUp
+
+# Redis replication #
+
+* slave opens a tcp socket connected to the master redis
+* slave issues a "SYNC" command
+* master asynchronously dumps its dataset to disk
+* dataset is transfered to the slave as an rdb dump
+* master streams updates to the slave using the redis text protocol
+
+!SLIDE transition=scrollUp
+
+# Nsync callback structure #
+
+        {load, Key, Value}
+        {load, eof}
+        {cmd, Cmd, Args}
+        {error, {unhandled_command, Cmd}}
+        {error, closed}
+
+!SLIDE transition=scrollUp
+
+# Example #
+
+        1> nsync:start_link().
+
 !SLIDE center transition=scrollUp
 
 # An example of Redis at Heroku #
 
+!SLIDE smbullets incremental transition=scrollUp
+
+# github.com/heroku/logplex #
+
+* Heroku log router
+* Receives syslog packets
+* from Heroku infrastructure components
+* from user applications
+
+!SLIDE smaller transition=scrollUp
+
+        $ heroku logs
+        heroku[web.1]: Starting process with command: `thin -p 23533 -e production -R /home/heroku_rack/heroku.ru start`
+        app[web.1]: >> Thin web server (v1.2.6 codename Crazy Delicious)
+        app[web.1]: >> Maximum connections set to 1024
+        app[web.1]: >> Listening on 0.0.0.0:23533, CTRL+C to stop
+        heroku[web.1]: State changed from starting to up
+        app[web.1]: 204.14.152.118 - - [02/Jun/2011 16:27:18] "GET / HTTP/1.1" 200 9346 0.0022
+        heroku[router]: GET myapp.heroku.com/ dyno=web.1 queue=0 wait=0ms service=5ms bytes=9513
+        heroku[nginx]: HEAD / HTTP/1.1 | 178.63.19.47 | 0 | http | 200
+
 !SLIDE center transition=scrollUp
+
+# Logplex replication #
+
+![logplex](logplex_nsync.png)
+        
+!SLIDE transition=scrollUp
 
 # Erlang routing mesh #
 
@@ -169,31 +251,6 @@
         00:25:08: STATUS: master_link_status:up
         00:25:08: CONFIG SET MASTERAUTH NULL
         00:25:08: OK
-        
-!SLIDE center smbullets transition=scrollUp
-
-# github.com/JacobVorreuter/nsync
-
-* Prototype of an Erlang Redis replication client
-
-!SLIDE center smbullets incremental transition=scrollUp
-
-# Redis replication #
-
-* slave opens a tcp socket connected to the master redis
-* slave issues a "SYNC" command
-* master asynchronously dumps its dataset to disk
-* dataset is transfered to the slave as an rdb dump
-* master streams updates to the slave using the redis text protocol
-
-!SLIDE center smbullets incremental transition=scrollUp
-
-# Nsync in-memory storage #
-
-* Nsync stores redis keys in ETS tables
-* strings -> binaries
-* sets and lists -> lists
-* hashes -> dicts
 
 !SLIDE center transition=scrollUp
 
