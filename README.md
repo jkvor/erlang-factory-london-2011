@@ -4,6 +4,18 @@ Jacob Vorreuter and Orion Henry
 
 ## Code snippets
 
+### Redo
+
+    redo:start_link().
+    {ok, Pid} = redo:start_link(undefined).
+    redo:cmd(["SET", "one", "abc"]).
+    redo:cmd(Pid, ["SET", "two", "def"]).
+    redo:cmd([["GET", "one"], ["GET", "two"]]).
+    redo:cmd([["SADD", "sfoo", "123"], ["SADD", "sfoo", "456"]]).
+    redo:cmd(["SMEMBERS", "sfoo"]).
+    redo:cmd(["HMSET", "hfoo", "width", "100", "height", "75", "depth", "50"]).
+    redo:cmd(["HGETALL", "hfoo"]).
+
 ### Redgrid
 
     $ erl -pa ebin deps/redo/ebin -sname foo
@@ -32,17 +44,6 @@ Jacob Vorreuter and Orion Henry
 ### Logplex\_face
 
 http://github.com/JacobVorreuter/logplex_face/blob/redgrid/logplex_face.rb
-
-### Redo
-
-    redo:start_link().
-    redo:cmd(["SET", "one", "abc"]).
-    redo:cmd(["SET", "two", "def"]).
-    redo:cmd([["GET", "one"], ["GET", "two"]]).
-    redo:cmd([["SADD", "sfoo", "123"], ["SADD", "sfoo", "456"]]).
-    redo:cmd(["SMEMBERS", "sfoo"]).
-    redo:cmd(["HMSET", "hfoo", "width", "100", "height", "75", "depth", "50"]).
-    redo:cmd(["HGETALL", "hfoo"]).
 
 ### Nsync
 

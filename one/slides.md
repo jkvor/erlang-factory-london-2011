@@ -42,47 +42,19 @@
 
 !SLIDE center smbullets transition=scrollUp
 
-# github.com/JacobVorreuter/redgrid #
-
-* Automatic Erlang node discovery via Redis
-
-!SLIDE center transition=scrollUp
-
-![redgrid2](redgrid2.png)
-
-!SLIDE center transition=scrollUp
-
-![redgrid](redgrid.png)
-
-!SLIDE transition=scrollUp small
-
-# Attaching meta data to nodes #
-
-	1> node().
-	'foo@blah'
-	2> redgrid:update_meta([{weight, 0}]).
-	ok
-
-	1> node().
-	'bar@wha'
-	2> redgrid:nodes().
-	[{'bar@wha',  [{ip, "10.0.0.2"}]},
-	 {'foo@blah', [{ip, "10.0.0.1"},
-	               {weight, 0}]}]
-
-!SLIDE center smbullets transition=scrollUp
-
 # github.com/JacobVorreuter/redo #
 
 * pipelined erlang redis client 
 
-!SLIDE smbullets incremental transition=scrollUp
+!SLIDE smbullets transition=scrollUp
 
 # First there was redis_pool #
 
-* defined pools of gen_servers holding connections to redis
+* only accepted raw multi bulk redis commands
+* defined pools of gen_servers holding connections to Redis
 * gen_server:call(redis_pool:pid(), {cmd, Cmd}, ?TIMEOUT)
 * each connection was syncronous
+* Redis could only process a # of commands equal to # of pids in pool
 
 !SLIDE transition=scrollUp small
 
@@ -91,13 +63,16 @@
         1> redo:start_link().
         {ok,<0.33.0>}
 
-        2> redo:cmd(["SET", "one", "abc"]).
+        2> {ok, Pid} = redo:start_link(undefined).
+        {ok,<0.37.0>}        
+
+        3> redo:cmd(["SET", "one", "abc"]).
         <<"OK">>
 
-        3> redo:cmd(["SET", "two", "def"]).
+        4> redo:cmd(Pid, ["SET", "two", "def"]).
         <<"OK">>
 
-        4> redo:cmd([["GET", "one"],
+        5> redo:cmd([["GET", "one"],
                      ["GET", "two"]]).
         [<<"abc">>,<<"def">>]
 
@@ -150,9 +125,45 @@
 
 !SLIDE center smbullets transition=scrollUp
 
+# github.com/JacobVorreuter/redgrid #
+
+* Automatic Erlang node discovery via Redis
+
+!SLIDE center transition=scrollUp
+
+![redgrid2](redgrid2.png)
+
+!SLIDE center transition=scrollUp
+
+![redgrid](redgrid.png)
+
+!SLIDE transition=scrollUp small
+
+# Attaching meta data to nodes #
+
+	1> node().
+	'foo@blah'
+	2> redgrid:update_meta([{weight, 0}]).
+	ok
+
+	1> node().
+	'bar@wha'
+	2> redgrid:nodes().
+	[{'bar@wha',  [{ip, "10.0.0.2"}]},
+	 {'foo@blah', [{ip, "10.0.0.1"},
+	               {weight, 0}]}]
+
+!SLIDE center smbullets transition=scrollUp
+
 # github.com/JacobVorreuter/nsync
 
 * Erlang Redis replication client
+
+!SLIDE center smbullets transition=scrollUp
+
+# A common problem at Heroku #
+
+* State must be shared between components or nodes. Maintaining a local cache of state data is slow to initially populate and difficult to keep in sync
 
 !SLIDE center smbullets incremental transition=scrollUp
 
@@ -170,7 +181,7 @@
 
 # Nysnc #
 
-* under 700 loc
+* under 700 loc (majority is parsing rdb dump format)
 * uses lzf compression library via NIF
 * implements a callback interface
 
@@ -211,13 +222,9 @@
 * from Heroku infrastructure components
 * from user applications
 
-!SLIDE smaller transition=scrollUp
+!SLIDE center transition=scrollUp
 
-        $ heroku logs
-        heroku[web.1]: State changed from starting to up
-        app[web.1]: 204.14.152.118 - - [02/Jun/2011 16:27:18] "GET / HTTP/1.1" 200 9346 0.0022
-        heroku[router]: GET myapp.heroku.com/ dyno=web.1 queue=0 wait=0ms service=5ms bytes=9513
-        heroku[nginx]: HEAD / HTTP/1.1 | 178.63.19.47 | 0 | http | 200
+![logs](logs.png)
 
 !SLIDE center transition=scrollUp
 
@@ -281,3 +288,6 @@
 
 ![tempo](tempo.png)
 
+!SLIDE center transiton=scrollUp
+
+# erlang-factory.herokuapp.com #
