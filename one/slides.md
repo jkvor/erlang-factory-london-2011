@@ -147,9 +147,9 @@
 	ok
 
 	1> node().
-	'bar@wha'
+	'bar@blah'
 	2> redgrid:nodes().
-	[{'bar@wha',  [{ip, "10.0.0.2"}]},
+	[{'bar@blah',  [{ip, "10.0.0.2"}]},
 	 {'foo@blah', [{ip, "10.0.0.1"},
 	               {weight, 0}]}]
 
