@@ -224,10 +224,6 @@
 
 !SLIDE center transition=scrollUp
 
-![logs](logs.png)
-
-!SLIDE center transition=scrollUp
-
 # Logplex replication #
 
 ![logplex](logplex_nsync.png)
