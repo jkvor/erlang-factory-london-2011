@@ -7,9 +7,8 @@ Jacob Vorreuter and Orion Henry
 ### Redo
 
     redo:start_link().
-    {ok, Pid} = redo:start_link(undefined).
     redo:cmd(["SET", "one", "abc"]).
-    redo:cmd(Pid, ["SET", "two", "def"]).
+    redo:cmd(["SET", "two", "def"]).
     redo:cmd([["GET", "one"], ["GET", "two"]]).
     redo:cmd([["SADD", "sfoo", "123"], ["SADD", "sfoo", "456"]]).
     redo:cmd(["SMEMBERS", "sfoo"]).
